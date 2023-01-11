@@ -6,6 +6,15 @@ import pandas as pd
 
 import torch
 
+def pickle_save(obj, filepath):
+    with open(filepath, "wb") as f:
+        pickle.dump(obj, f)
+
+def pickle_load(filepath):
+    with open(filepath, "rb") as f:
+        obj = pickle.load(f)
+    return obj
+
 def get_hsm_dataset(dataset_path, selected_files=None):
     """
     Creates generator for time series from `huge stock market dataset`
@@ -68,9 +77,9 @@ def get_ett_dataset(dataset_path):
             yield df[col].values.flatten()
 
 def get_etl_dataset(filepath):
-    df = pd.read_csv(filepath)
+    df = pd.read_csv(filepath, sep=";", usecols=[f"MT_{i:0>3}" for i in range(1, 371)])
     for col in (f"MT_{i:0>3}" for i in range(1, 371)):
-        ts = np.trim_zeros(df[col].values.flatten())
+        ts = np.trim_zeros(df[col].str.replace(",", ".").astype(float).dropna().values.flatten())
         yield ts
 
 def get_dataset_iterator(dataset_name, dataset_path):
@@ -178,6 +187,9 @@ def create_ts_dl(X, y, lags, horizon, stride, batch_size, device, val_size, test
 
 
 class DimUniversalStandardScaler:
+    def __init__(self, eps=1e-9):
+        self.eps = eps
+
     def fit(self, data):
         if isinstance(data, pd.DataFrame):
             data = data.values
@@ -185,7 +197,7 @@ class DimUniversalStandardScaler:
         self.std = np.std(data)
     
     def transform(self, data):
-        return (data - self.mu) / self.std
+        return (data - self.mu) / (self.std + self.eps)
     
     def fit_transform(self, data):
         self.fit(data)
@@ -193,3 +205,24 @@ class DimUniversalStandardScaler:
 
     def inverse_transform(self, data):
         return data * self.std + self.mu
+
+
+class DimUniversalMinMaxScaler:
+    def __init__(self, eps=1e-9):
+        self.eps = eps
+
+    def fit(self, data):
+        if isinstance(data, pd.DataFrame):
+            data = data.values
+        self.min = np.min(data)
+        self.max = np.max(data)
+    
+    def transform(self, data):
+        return (data - self.min) / max(self.max - self.min, self.eps)
+    
+    def fit_transform(self, data):
+        self.fit(data)
+        return self.transform(data)
+
+    def inverse_transform(self, data):
+        return data * max(self.max - self.min, self.eps) + self.min

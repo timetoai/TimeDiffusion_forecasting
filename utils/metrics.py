@@ -7,6 +7,9 @@ def MAE_numpy(y_pred, y_true):
 def MSE_numpy(y_pred, y_true):
     return ((y_pred - y_true) ** 2).mean()
 
+def MAPE_numpy(y_pred, y_true, eps=1e-9):
+    return (np.abs(y_pred - y_true) / (eps + np.abs(y_true))).mean()
+
 
 class MAE_torch(torch.nn.Module):
     def __init__(self):
