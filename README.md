@@ -8,7 +8,7 @@ Diffusion based temporal convolutional model for time-series forecasting. Main f
    * [utils/data.py](./utils/data.py) - functions for datasets processing
    * [utils/timediffusion.py](./utils/timediffusion.py) - TimeDiffusion model class
  * [results](./results) - folder with csv results files of model evaluation on different datasets
- * [eval_td.py](./eval_td.py) - python script for full evaluation pipeline on chosen dataset
+ * [eval_{```MODEL_NAME```}.py]() - python script for full evaluation pipeline on chosen dataset for ```MODEL_NAME```
  * [TimeDIffussion_exchange_rate_tests.ipynb](./TimeDIffussion_exchange_rate_tests.ipynb) - visualizations of the forecasts
  * [TD_vis.ipynb](./TD_vis.ipynb) - different visualizations
  
